@@ -1,3 +1,2 @@
-print("hello world!")
-#BAKA BOI
-print(1 + 6)
+#osy zherden bastaisyn
+print('start')
