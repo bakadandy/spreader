@@ -10,19 +10,19 @@ class LoginWindow(QWidget):
 
     def init_ui(self):
         # Настройка основного окна
-        self.setWindowTitle('Speed Reader')
+        self.setWindowTitle('Тез оқу')
         self.setGeometry(100, 100, 300, 150)
 
         # Создание виджетов
-        self.label_login = QLabel('логин')
-        self.label_password = QLabel('пароль')
+        self.label_login = QLabel('Логин:')
+        self.label_password = QLabel('Пароль:')
 
         self.text_login = QLineEdit(self)
         self.text_password = QLineEdit(self)
         self.text_password.setEchoMode(QLineEdit.Password)  # Скрываем пароль
 
-        self.button_login = QPushButton('Войти', self)
-        self.button_create_account = QPushButton('Создать аккаунт', self)
+        self.button_login = QPushButton('Кіру', self)
+        self.button_create_account = QPushButton('Аккаун жасау', self)
 
         # Настройка расположения виджетов
         layout = QVBoxLayout()
@@ -54,11 +54,11 @@ class LoginWindow(QWidget):
         # Обработка события при нажатии кнопки "Войти"
         login = self.text_login.text()
         password = self.text_password.text()
-        print(f'Попытка входа с логином: {login}, паролем: {password}')
+        print(f'Осы логинмен: {login}, парольмен кіру: {password}')
 
     def handle_create_account(self):
         # Обработка события при нажатии кнопки "Создать аккаунт"
-        print('Создание нового аккаунта')
+        print('Жаңа аккаун жасау')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
