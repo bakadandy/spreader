@@ -101,16 +101,17 @@ class TypingSpeedTest(QWidget):
         self.is_running = False
 
     def init_ui(self):
-        self.setWindowTitle('Typing Speed Test')
+        self.setWindowTitle('Текстты енгізу аймағы')
+        self.setGeometry(100, 100, 400, 800)
 
         # Text editor
         self.text_edit = QTextEdit(self)
 
         # Buttons
-        self.open_file_button = QPushButton('Открыть Файл')
-        self.copy_clipboard_button = QPushButton('Скопировать текст из буфера')
-        self.start_button = QPushButton('Старт')
-        self.stop_button = QPushButton('Стоп')
+        self.open_file_button = QPushButton('Файлды ашу')
+        self.copy_clipboard_button = QPushButton('Буфердан текстты көшіру')
+        self.start_button = QPushButton('Бастау')
+        self.stop_button = QPushButton('Аяқтау')
 
         # Connect buttons to functions
         self.open_file_button.clicked.connect(self.open_file)
@@ -176,8 +177,8 @@ class TypingSpeedTest(QWidget):
     def show_result(self, wpm):
         # Display a message box with the WPM result
         msg = QMessageBox()
-        msg.setWindowTitle("Результат")
-        msg.setText(f"Ваш результат составил {wpm:.2f} слов/мин")
+        msg.setWindowTitle("Қорытынды")
+        msg.setText(f"Сіздің қорытынды {wpm:.2f} сөз/мин")
         msg.setIcon(QMessageBox.Information)
         msg.setStandardButtons(QMessageBox.Yes)
         msg.exec_()
