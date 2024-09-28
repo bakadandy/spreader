@@ -37,7 +37,7 @@ class DBManager:
                 new_score = score + old_score
 
                 self.cursor.execute(
-                    "UPDATE users SET wm_rating = ?, score = ? WHERE id = ?",
+                    "UPDATE stats SET wm_rating = ?, score = ? WHERE id = ?",
                     (new_wm_rating, new_score, id)
                 )
                 print("Көрсеткіштер жаңартылды")
