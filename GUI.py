@@ -4,9 +4,11 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
-
+        self.db = db_manager.DBManager()
         self.init_ui()
 
+    def __del__(self):
+        del self.db
     def init_ui(self):
         # Настройка основного окна
         self.setWindowTitle('Тез оқу')
@@ -15,6 +17,7 @@ class LoginWindow(QWidget):
         # Создание виджетов
         self.label_login = QLabel('Логин:')
         self.label_password = QLabel('Пароль:')
+        self.label_info = QLabel(' ')
 
         self.text_login = QLineEdit(self)
         self.text_password = QLineEdit(self)
@@ -25,6 +28,9 @@ class LoginWindow(QWidget):
 
         # Настройка расположения виджетов
         layout = QVBoxLayout()
+
+        layout_info = QHBoxLayout()
+        layout.addWidget(self.label_info)
 
         layout_login = QHBoxLayout()
         layout_login.addWidget(self.label_login)
@@ -53,9 +59,13 @@ class LoginWindow(QWidget):
         # Обработка события при нажатии кнопки "Войти"
         login = self.text_login.text()
         password = self.text_password.text()
+        self.label_info.setText(self.db.login_check(login, password))
         print(f'Осы логинмен: {login}, парольмен кіру: {password}')
 
     def handle_create_account(self):
         # Обработка события при нажатии кнопки "Создать аккаунт"
+        login = self.text_login.text()
+        password = self.text_password.text()
+        self.label_info.setText(self.db.add_user(login, password))
         print('Жаңа аккаунт жасау')
 
