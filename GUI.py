@@ -1,4 +1,3 @@
-import sys
 import db_manager
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout
 
@@ -22,7 +21,7 @@ class LoginWindow(QWidget):
         self.text_password.setEchoMode(QLineEdit.Password)  # Скрываем пароль
 
         self.button_login = QPushButton('Кіру', self)
-        self.button_create_account = QPushButton('Аккаун жасау', self)
+        self.button_create_account = QPushButton('Аккаунт жасау', self)
 
         # Настройка расположения виджетов
         layout = QVBoxLayout()
@@ -58,10 +57,5 @@ class LoginWindow(QWidget):
 
     def handle_create_account(self):
         # Обработка события при нажатии кнопки "Создать аккаунт"
-        print('Жаңа аккаун жасау')
+        print('Жаңа аккаунт жасау')
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = LoginWindow()
-    window.show()
-    sys.exit(app.exec_())
