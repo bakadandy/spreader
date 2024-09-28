@@ -59,6 +59,9 @@ class LoginWindow(QWidget):
         # Обработка события при нажатии кнопки "Войти"
         login = self.text_login.text()
         password = self.text_password.text()
+        if login.strip() == "" or password.strip() == "":
+            self.label_info.setText("Аккауттың атын немесе құпиясөзін еңгізіңіз")
+            return
         self.label_info.setText(self.db.login_check(login, password))
         print(f'Осы логинмен: {login}, парольмен кіру: {password}')
 
@@ -66,6 +69,9 @@ class LoginWindow(QWidget):
         # Обработка события при нажатии кнопки "Создать аккаунт"
         login = self.text_login.text()
         password = self.text_password.text()
+        if login.strip() == "" or password.strip() == "":
+            self.label_info.setText("Аккауттың атын немесе құпиясөзін еңгізіңіз")
+            return
         self.label_info.setText(self.db.add_user(login, password))
         print('Жаңа аккаунт жасау')
 
