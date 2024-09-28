@@ -1,7 +1,7 @@
 import time
 
 from PyQt5.QtCore import QTimer
-
+from PyQt5.QtWidgets import *
 import db_manager
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QTextEdit, \
     QFileDialog, QMessageBox
@@ -96,9 +96,11 @@ class TypingSpeedTest(QWidget):
 
         # Timer for calculating words per minute
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_time)
+        self.timer.timeout.connect(self.update_timer)
         self.start_time = 0
         self.is_running = False
+
+        self.elapsed_time = 0
 
     def init_ui(self):
         self.setWindowTitle('Текстты енгізу аймағы')
@@ -106,7 +108,11 @@ class TypingSpeedTest(QWidget):
 
         # Text editor
         self.text_edit = QTextEdit(self)
-
+        #LCD
+        self.lcd = QLCDNumber(self)
+        self.lcd.display('00:00')
+        self.lcd.setDigitCount(9)
+        self.lcd.setFixedSize(300, 100)
         # Buttons
         self.open_file_button = QPushButton('Файлды ашу')
         self.copy_clipboard_button = QPushButton('Буфердан текстты көшіру')
@@ -126,6 +132,7 @@ class TypingSpeedTest(QWidget):
 
         start_stop_layout = QHBoxLayout()
         start_stop_layout.addWidget(self.start_button)
+        start_stop_layout.addWidget(self.lcd)
         start_stop_layout.addWidget(self.stop_button)
 
         # Main layout
@@ -151,16 +158,14 @@ class TypingSpeedTest(QWidget):
 
     def start_test(self):
         # Start the timer for the typing test
-        self.text_edit.setReadOnly(False)  # Allow typing
-        self.text_edit.clear()  # Clear any pre-existing text
+        self.text_edit.setReadOnly(True)  # Allow typing
         self.start_time = time.time()
         self.is_running = True
-        self.timer.start(1000)  # Update timer every second
+        self.timer.start(1)  # Update timer every second
+        self.start_button.setEnabled(False)  # Disable start button while timer is running
+        self.stop_button.setEnabled(True)
 
     def stop_test(self):
-        if not self.is_running:
-            return
-
         self.timer.stop()
         elapsed_time = time.time() - self.start_time
         text = self.text_edit.toPlainText()
@@ -170,9 +175,19 @@ class TypingSpeedTest(QWidget):
         wpm = (word_count / elapsed_time) * 60
         self.show_result(wpm)
         self.is_running = False
+        self.elapsed_time = 0  # Reset elapsed time
+        self.start_button.setEnabled(True)
+        self.stop_button.setEnabled(False)
 
-    def update_time(self):
-        pass  # Update timer display if necessary
+    def update_timer(self):
+        self.elapsed_time += 1  # Increment elapsed time
+        minutes = (self.elapsed_time // 60000) % 60  # Calculate minutes
+        seconds = (self.elapsed_time // 1000) % 60  # Calculate seconds
+        milliseconds = self.elapsed_time % 1000  # Calculate milliseconds
+
+        # Format time as mm:ss:msms
+        formatted_time = f"{minutes:02}:{seconds:02}:{milliseconds:03}"
+        self.lcd.display(formatted_time)
 
     def show_result(self, wpm):
         # Display a message box with the WPM result
