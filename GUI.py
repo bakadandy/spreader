@@ -68,8 +68,11 @@ class LoginWindow(QWidget):
         if login.strip() == "" or password.strip() == "":
             self.label_info.setText("Аккауттың атын немесе құпиясөзін еңгізіңіз")
             return
-        self.label_info.setText(self.db.login_check(login, password))
-        print(f'Осы логинмен: {login}, парольмен кіру: {password}')
+        answer = self.db.login_check(login, password)
+        self.label_info.setText(answer)
+        if answer == "Тіркелу орындалды":
+            print(f'Осы логинмен: {login}, парольмен кіру: {password}')
+            self.show_TypingSpeedTest()
 
     def handle_create_account(self):
         # Обработка события при нажатии кнопки "Создать аккаунт"
@@ -80,6 +83,10 @@ class LoginWindow(QWidget):
             return
         self.label_info.setText(self.db.add_user(login, password))
         print('Жаңа аккаунт жасау')
+    def show_TypingSpeedTest(self):
+        self.typingspeedtest = TypingSpeedTest()
+        self.typingspeedtest.show()
+        self.close()
 
 class TypingSpeedTest(QWidget):
     def __init__(self):
