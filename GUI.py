@@ -6,6 +6,8 @@ import db_manager
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QTextEdit, \
     QFileDialog, QMessageBox
 
+from PyQt5 import QtWidgets
+
 
 class LoginWindow(QWidget):
     def __init__(self):
@@ -182,3 +184,101 @@ class TypingSpeedTest(QWidget):
         msg.setIcon(QMessageBox.Information)
         msg.setStandardButtons(QMessageBox.Yes)
         msg.exec_()
+
+class RSVPDialog(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+
+        # Set window properties
+        self.setWindowTitle('Жаттығу')
+        self.setGeometry(100, 100, 400, 300)
+
+        # Layout setup
+        layout = QtWidgets.QVBoxLayout()
+
+        # Input line edit for RSVP word display
+        self.word_display = QtWidgets.QLineEdit(self)
+        self.word_display.setAlignment(Qt.AlignCenter)
+        self.word_display.setReadOnly(True)
+        layout.addWidget(self.word_display)
+
+        # Slider for progress
+        self.progress_slider = QtWidgets.QSlider(Qt.Horizontal, self)
+        self.progress_slider.setMinimum(0)
+        layout.addWidget(self.progress_slider)
+
+        # Speed setting layout (includes QLabel and QSpinBox)
+        speed_layout = QtWidgets.QHBoxLayout()
+        speed_label = QtWidgets.QLabel("Жылдамдық (сөз/мин):")
+        speed_layout.addWidget(speed_label)
+
+        self.speed_spin_box = QtWidgets.QSpinBox(self)
+        self.speed_spin_box.setRange(10, 1000)  # Min 10 WPM, Max 1000 WPM
+        self.speed_spin_box.setValue(200)  # Default speed
+        speed_layout.addWidget(self.speed_spin_box)
+        layout.addLayout(speed_layout)
+
+        # Text area for input
+        self.text_area = QtWidgets.QTextEdit(self)
+        layout.addWidget(self.text_area)
+
+        # Buttons for starting and pausing
+        button_layout = QtWidgets.QHBoxLayout()
+
+        self.start_button = QtWidgets.QPushButton('Бастау', self)
+        button_layout.addWidget(self.start_button)
+
+        self.pause_button = QtWidgets.QPushButton('Пауза', self)
+        button_layout.addWidget(self.pause_button)
+
+        layout.addLayout(button_layout)
+
+        # Set main layout
+        self.setLayout(layout)
+
+        # Connect buttons to functions
+        self.start_button.clicked.connect(self.start_rsvp)
+        self.pause_button.clicked.connect(self.toggle_pause)
+
+        # Timer setup for word display
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_word)
+        self.words = []
+        self.current_word_index = 0
+        self.is_paused = False
+
+    def start_rsvp(self):
+        text = self.text_area.toPlainText()
+        if text:
+            self.words = text.split()
+            self.current_word_index = 0
+            self.progress_slider.setMaximum(len(self.words) - 1)
+
+            # Get speed value from spin box (WPM)
+            interval = 60000 // self.speed_spin_box.value()  # Speed in milliseconds per word
+            self.timer.start(interval)
+            self.update_word()
+
+    def toggle_pause(self):
+        if self.timer.isActive():
+            self.timer.stop()
+            self.pause_button.setText('Жалғастыру')
+        else:
+            if self.words:
+                interval = 60000 // self.speed_spin_box.value()
+                self.timer.start(interval)
+                self.pause_button.setText('Пауза')
+
+    def update_word(self):
+        if self.current_word_index < len(self.words):
+            # Update the displayed word
+            self.word_display.setText(self.words[self.current_word_index])
+
+            # Move the progress slider to show reading progress
+            self.progress_slider.setValue(self.current_word_index)
+
+            # Increment the index to the next word
+            self.current_word_index += 1
+        else:
+            # Stop the timer when we reach the end of the text
+            self.timer.stop()
