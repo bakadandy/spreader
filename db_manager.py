@@ -5,7 +5,9 @@ class DBManager:
         self.conn = sqlite3.connect('users.db')
         self.cursor = self.conn.cursor()
 
-
+    def __del__(self):
+        self.cursor.close()
+        self.conn.close()
     def add_user(self, username, password):
         self.cursor.execute(f"INSERT INTO users(username, password) VALUES('{username}', '{password}')")
         res = self.cursor.execute(f"SELECT id FROM users WHERE username = '{username}'")
