@@ -18,8 +18,8 @@ class DBManager:
             id = id_tuple[0]
 
             self.cursor.execute("INSERT INTO stats VALUES(?, ?, ?)", (id, 0, 0))
-            print("user added successfully")
-            return "user added successfully"
+            print("Қолданушы тіркелді")
+            return "Қолданушы тіркелді"
         except Exception as e:
             print(e)
 
@@ -29,8 +29,8 @@ class DBManager:
 
             old_wm_rating, old_score = res.fetchone()
             if (old_wm_rating == None or old_score == None):
-                print("user not found")
-                return "user not found"
+                print("Колданушы табылмады")
+                return "Қолданушы табылмады"
 
             else:
                 new_wm_rating = max(wm_rating, old_wm_rating)
@@ -40,8 +40,8 @@ class DBManager:
                     "UPDATE users SET wm_rating = ?, score = ? WHERE id = ?",
                     (new_wm_rating, new_score, id)
                 )
-                print("stats updated successfully")
-                return "stats updated successfully"
+                print("Көрсеткіштер жаңартылды")
+                return "Көрсеткіштер жаңартылды"
 
         except Exception as e:
             print(e)
@@ -52,22 +52,22 @@ class DBManager:
         user = self.cursor.fetchone()  # fetchone() returns None if no result is found
 
         if user is None:
-            print("user not found")
-            return "Incorrect username or password"
+            print("Колданушы табылмады")
+            return "Кұпиясөз немесе қолданушы аты дұрыс емес"
         else:
-            print("user found")
-            return "Successful login"
+            print("Колданушы табылды")
+            return "Тіркелу орындалды"
     def receive_stats(self, id):
         self.cursor.execute("SELECT wm_rating, score FROM stats WHERE id = ?", (id,))
         result = self.cursor.fetchone()
 
         # Check if result is None (no user found)
         if result is None:
-            print("user not found")
-            return "Incorrect id"
+            print("Колданушы табылмады")
+            return "Id дұрыс емес"
         else:
             # Unpack wm_rating and score from the result tuple
             wm_rating, score = result
-            print("user found")
+            print("Колданушы табылды")
             return wm_rating, score
 
