@@ -25,7 +25,7 @@ class DBManager:
 
     def update_stat(self, id, wm_rating, score):
         try:
-            res = self.cursor.execute(f"SELECT wm_rating, score FROM stats WHERE id = {id}")
+            res = self.cursor.execute("SELECT wm_rating, score FROM stats WHERE id = ?", (id))
 
             old_wm_rating, old_score = res.fetchone()
             if (old_wm_rating == None or old_score == None):
@@ -36,7 +36,10 @@ class DBManager:
                 new_wm_rating = max(wm_rating, old_wm_rating)
                 new_score = score + old_score
 
-                self.cursor.execute(f"UPDATE users SET wm_rating={new_wm_rating}, score={new_score} WHERE id = {id}")
+                self.cursor.execute(
+                    "UPDATE users SET wm_rating = ?, score = ? WHERE id = ?",
+                    (new_wm_rating, new_score, id)
+                )
                 print("stats updated successfully")
                 return "stats updated successfully"
 
@@ -45,21 +48,26 @@ class DBManager:
             return f"Error occured, {e}"
 
     def login_check(self, username, password):
-        res = self.cursor.execute(f"SELECT id FROM users WHERE username = {username} AND password = {password}")
-        id = res.fetchone()
-        if id == None:
+        self.cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, password))
+        user = self.cursor.fetchone()  # fetchone() returns None if no result is found
+
+        if user is None:
             print("user not found")
             return "Incorrect username or password"
         else:
             print("user found")
             return "Successful login"
     def receive_stats(self, id):
-        res = self.cursor.execute(f"SELECT wm_rating, score FROM stats WHERE id = {id}")
-        wm_rating, score = res.fetchone()
-        if wm_rating == None or score == None:
+        self.cursor.execute("SELECT wm_rating, score FROM stats WHERE id = ?", (id,))
+        result = self.cursor.fetchone()
+
+        # Check if result is None (no user found)
+        if result is None:
             print("user not found")
             return "Incorrect id"
         else:
+            # Unpack wm_rating and score from the result tuple
+            wm_rating, score = result
             print("user found")
             return wm_rating, score
 
