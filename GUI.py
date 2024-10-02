@@ -107,7 +107,7 @@ class chooseWindow(QWidget):
         self.statistics_button = QPushButton('Статистика')
         self.training_button = QPushButton('Жаттығу аймағы')
         self.testing_button = QPushButton('Тестілеу аймағы')
-        self.logout_button = QPushButton('Аккаунтан шығу')
+        self.logout_button = QPushButton('Аккаунттан шығу')
 
         # Connect buttons to functions
         self.statistics_button.clicked.connect(self.open_statisctics_section)
