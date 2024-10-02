@@ -26,14 +26,14 @@ class DBManager:
 
     def update_stat(self, id, wm_rating, score):
         try:
-            res = self.cursor.execute("SELECT wm_rating, score FROM stats WHERE id = ?", (id))
+            res = self.cursor.execute("SELECT wm_rating, score FROM stats WHERE id = ?", ((id,)))
 
             old_wm_rating, old_score = res.fetchone()
-            if (old_wm_rating == None or old_score == None):
+            if old_wm_rating is None or old_score is None:
                 print("Колданушы табылмады")
                 return "Қолданушы табылмады"
-
             else:
+                print("this works")
                 new_wm_rating = max(wm_rating, old_wm_rating)
                 new_score = score + old_score
 
@@ -72,6 +72,16 @@ class DBManager:
             wm_rating, score = result
             print("Колданушы табылды")
             return wm_rating, score
+    def get_id(self, username):
+        self.cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
+        result = self.cursor.fetchone()
+
+        if result is None:
+            print("Колданушы табылмады")
+            return None
+        else:
+            print("Колданушы табылды")
+            return result[0]
 
     # add leader board
 

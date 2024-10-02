@@ -52,6 +52,7 @@ class LoginWindow(QWidget):
         layout_buttons.addWidget(self.button_create_account)
 
         # Добавление в главный layout
+        layout.addLayout(layout_info)
         layout.addLayout(layout_login)
         layout.addLayout(layout_password)
         layout.addLayout(layout_buttons)
@@ -72,8 +73,9 @@ class LoginWindow(QWidget):
         answer = self.db.login_check(login, password)
         self.label_info.setText(answer)
         if answer == "Тіркелу орындалды":
+            self.username = login
             print(f'Осы логинмен: {login}, парольмен кіру: {password}')
-            self.show_chooseWindow()
+            self.show_chooseWindow(self.username)
 
     def handle_create_account(self):
         # Обработка события при нажатии кнопки "Создать аккаунт"
@@ -85,27 +87,30 @@ class LoginWindow(QWidget):
         self.label_info.setText(self.db.add_user(login, password))
         print('Жаңа аккаунт жасау')
 
-    def show_chooseWindow(self):
+    def show_chooseWindow(self, username):
         self.hide()
-        self.chooseWindow = chooseWindow(self)
+        self.chooseWindow = chooseWindow(self, username)
         self.chooseWindow.show()
 
 class chooseWindow(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, username):
         super().__init__()
         self.parent = parent
         self.init_ui()
+        self.username = username
 
     def init_ui(self):
         self.setWindowTitle('Мәзір')
         self.setGeometry(100, 100, 300, 100)
 
         # Buttons for training and testing sections
+        self.statistics_button = QPushButton('Статистика')
         self.training_button = QPushButton('Жаттығу аймағы')
         self.testing_button = QPushButton('Тестілеу аймағы')
         self.logout_button = QPushButton('Аккаунтан шығу')
 
         # Connect buttons to functions
+        self.statistics_button.clicked.connect(self.open_statisctics_section)
         self.training_button.clicked.connect(self.open_training_section)
         self.testing_button.clicked.connect(self.open_testing_section)
         self.logout_button.clicked.connect(self.logout)
@@ -114,6 +119,7 @@ class chooseWindow(QWidget):
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.training_button)
         button_layout.addWidget(self.testing_button)
+        button_layout.addWidget(self.statistics_button)
 
         logout_layout = QHBoxLayout()
         logout_layout.addWidget(self.logout_button)
@@ -124,7 +130,10 @@ class chooseWindow(QWidget):
         layout.addLayout(logout_layout)
 
         self.setLayout(layout)
-
+    def open_statisctics_section(self):
+        self.hide()
+        self.statistics_window = Statistics(self, self.username)
+        self.statistics_window.show()
     def open_training_section(self):
         # Open the RSVPDialog window for training
         self.hide()
@@ -134,20 +143,54 @@ class chooseWindow(QWidget):
     def open_testing_section(self):
         # Open the TestDialog window for testing
         self.hide()
-        self.testing_window = TypingSpeedTest(self)
+        self.testing_window = TypingSpeedTest(self, self.username)
         self.testing_window.show()
 
     def logout(self):
         self.hide()
         self.parent.show()
 
+class Statistics(QWidget):
+    def __init__(self, parent, username):
+        self.username = username
+        super().__init__()
+        self.parent = parent
+        self.db = db_manager.DBManager()
+        self.init_ui()
+
+    def __del__(self):
+        del self.db
+    def init_ui(self):
+        self.setWindowTitle('Статистика')
+        self.setGeometry(100, 100, 300, 100)
+
+        # Buttons for training and testing sections
+        id = self.db.get_id(self.username)
+        wpm, score = self.db.receive_stats(id)
+        self.label_wpm = QLabel(f"Оқу жылдамдығы - {wpm:.2f} сөз минутына")
+        self.label_score = QLabel(f"Ұпай саны - {score:.0f}")
+        self.back_btn = QPushButton('Артқа')
+
+        # Connect buttons to functions
+        self.back_btn.clicked.connect(self.go_back)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.label_wpm)
+        layout.addWidget(self.label_score)
+        layout.addWidget(self.back_btn)
+
+        self.setLayout(layout)
+    def go_back(self):
+        self.hide()
+        self.parent.show()
 
 class TypingSpeedTest(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, username):
+        self.username = username
         super().__init__()
         self.parent = parent
         self.init_ui()
-
+        self.db = db_manager.DBManager()
         # Timer for calculating words per minute
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_timer)
@@ -156,6 +199,8 @@ class TypingSpeedTest(QWidget):
 
         self.elapsed_time = 0
 
+    def __del__(self):
+        del self.db
     def init_ui(self):
         self.setWindowTitle('Тестілеу аймағы')
         self.setGeometry(100, 100, 400, 800)
@@ -253,6 +298,10 @@ class TypingSpeedTest(QWidget):
         msg = QMessageBox()
         msg.setWindowTitle("Қорытынды")
         msg.setText(f"Сіздің қорытынды {wpm:.2f} сөз/мин")
+
+        id = self.db.get_id(self.username)
+        print(self.username, id)
+        self.db.update_stat(id, wpm, wpm)
         msg.setIcon(QMessageBox.Information)
         msg.setStandardButtons(QMessageBox.Yes)
         msg.exec_()
