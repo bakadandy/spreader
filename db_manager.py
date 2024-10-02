@@ -18,6 +18,7 @@ class DBManager:
             id = id_tuple[0]
 
             self.cursor.execute("INSERT INTO stats VALUES(?, ?, ?)", (id, 0, 0))
+            self.conn.commit()
             print("Қолданушы тіркелді")
             return "Қолданушы тіркелді"
         except Exception as e:
@@ -40,6 +41,7 @@ class DBManager:
                     "UPDATE stats SET wm_rating = ?, score = ? WHERE id = ?",
                     (new_wm_rating, new_score, id)
                 )
+                self.conn.commit()
                 print("Көрсеткіштер жаңартылды")
                 return "Көрсеткіштер жаңартылды"
 
