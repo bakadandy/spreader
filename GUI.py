@@ -1,11 +1,12 @@
 import time
+import db_manager
 
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import *
-import db_manager
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QTextEdit, \
-    QFileDialog, QMessageBox
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QTextEdit,
+                             QFileDialog, QMessageBox, QLCDNumber)
+
 
 class LoginWindow(QWidget):
     def __init__(self):
@@ -72,7 +73,7 @@ class LoginWindow(QWidget):
         self.label_info.setText(answer)
         if answer == "Тіркелу орындалды":
             print(f'Осы логинмен: {login}, парольмен кіру: {password}')
-            self.show_TypingSpeedTest()
+            self.show_chooseWindow()
 
     def handle_create_account(self):
         # Обработка события при нажатии кнопки "Создать аккаунт"
@@ -83,15 +84,68 @@ class LoginWindow(QWidget):
             return
         self.label_info.setText(self.db.add_user(login, password))
         print('Жаңа аккаунт жасау')
-    def show_TypingSpeedTest(self):
-        self.typingspeedtest = TypingSpeedTest()
-        self.typingspeedtest.show()
-        self.close()
+
+    def show_chooseWindow(self):
+        self.hide()
+        self.chooseWindow = chooseWindow(self)
+        self.chooseWindow.show()
+
+class chooseWindow(QWidget):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle('Мәзір')
+        self.setGeometry(100, 100, 300, 100)
+
+        # Buttons for training and testing sections
+        self.training_button = QPushButton('Жаттығу аймағы')
+        self.testing_button = QPushButton('Тестілеу аймағы')
+        self.logout_button = QPushButton('Аккаунтан шығу')
+
+        # Connect buttons to functions
+        self.training_button.clicked.connect(self.open_training_section)
+        self.testing_button.clicked.connect(self.open_testing_section)
+        self.logout_button.clicked.connect(self.logout)
+
+        # Layout for training and testing buttons and LCD
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(self.training_button)
+        button_layout.addWidget(self.testing_button)
+
+        logout_layout = QHBoxLayout()
+        logout_layout.addWidget(self.logout_button)
+
+        # Main layout
+        layout = QVBoxLayout()
+        layout.addLayout(button_layout)
+        layout.addLayout(logout_layout)
+
+        self.setLayout(layout)
+
+    def open_training_section(self):
+        # Open the RSVPDialog window for training
+        self.hide()
+        self.training_window = RSVPDialog(self)
+        self.training_window.show()
+
+    def open_testing_section(self):
+        # Open the TestDialog window for testing
+        self.hide()
+        self.testing_window = TypingSpeedTest(self)
+        self.testing_window.show()
+
+    def logout(self):
+        self.hide()
+        self.parent.show()
+
 
 class TypingSpeedTest(QWidget):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
-
+        self.parent = parent
         self.init_ui()
 
         # Timer for calculating words per minute
@@ -103,27 +157,31 @@ class TypingSpeedTest(QWidget):
         self.elapsed_time = 0
 
     def init_ui(self):
-        self.setWindowTitle('Текстты енгізу аймағы')
+        self.setWindowTitle('Тестілеу аймағы')
         self.setGeometry(100, 100, 400, 800)
 
         # Text editor
         self.text_edit = QTextEdit(self)
+
         #LCD
         self.lcd = QLCDNumber(self)
         self.lcd.display('00:00')
         self.lcd.setDigitCount(9)
         self.lcd.setFixedSize(300, 100)
+
         # Buttons
         self.open_file_button = QPushButton('Файлды ашу')
         self.copy_clipboard_button = QPushButton('Буфердан текстты көшіру')
         self.start_button = QPushButton('Бастау')
         self.stop_button = QPushButton('Аяқтау')
+        self.back_btn = QPushButton('Артқа')
 
         # Connect buttons to functions
         self.open_file_button.clicked.connect(self.open_file)
         self.copy_clipboard_button.clicked.connect(self.copy_from_clipboard)
         self.start_button.clicked.connect(self.start_test)
         self.stop_button.clicked.connect(self.stop_test)
+        self.back_btn.clicked.connect(self.go_back)
 
         # Layout for buttons
         button_layout = QHBoxLayout()
@@ -134,6 +192,7 @@ class TypingSpeedTest(QWidget):
         start_stop_layout.addWidget(self.start_button)
         start_stop_layout.addWidget(self.lcd)
         start_stop_layout.addWidget(self.stop_button)
+        start_stop_layout.addWidget(self.back_btn)
 
         # Main layout
         layout = QVBoxLayout()
@@ -198,12 +257,18 @@ class TypingSpeedTest(QWidget):
         msg.setStandardButtons(QMessageBox.Yes)
         msg.exec_()
 
-class RSVPDialog(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
+    def go_back(self):
+        self.timer.stop()
+        self.hide()
+        self.parent.show()
 
+
+class RSVPDialog(QtWidgets.QWidget):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
         # Set window properties
-        self.setWindowTitle('Жаттығу')
+        self.setWindowTitle('Жаттығу аймағы')
         self.setGeometry(100, 100, 400, 300)
 
         # Layout setup
@@ -244,6 +309,9 @@ class RSVPDialog(QtWidgets.QWidget):
         self.pause_button = QtWidgets.QPushButton('Пауза', self)
         button_layout.addWidget(self.pause_button)
 
+        self.back_btn = QtWidgets.QPushButton('Артқа', self)
+        button_layout.addWidget(self.back_btn)
+
         layout.addLayout(button_layout)
 
         # Set main layout
@@ -252,6 +320,7 @@ class RSVPDialog(QtWidgets.QWidget):
         # Connect buttons to functions
         self.start_button.clicked.connect(self.start_rsvp)
         self.pause_button.clicked.connect(self.toggle_pause)
+        self.back_btn.clicked.connect(self.go_back)
 
         # Timer setup for word display
         self.timer = QTimer(self)
@@ -295,3 +364,8 @@ class RSVPDialog(QtWidgets.QWidget):
         else:
             # Stop the timer when we reach the end of the text
             self.timer.stop()
+
+    def go_back(self):
+        self.timer.stop()
+        self.hide()
+        self.parent.show()
