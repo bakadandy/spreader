@@ -86,13 +86,14 @@ class LoginWindow(QWidget):
         print('Жаңа аккаунт жасау')
 
     def show_chooseWindow(self):
-        self.chooseWindow = chooseWindow()
+        self.hide()
+        self.chooseWindow = chooseWindow(self)
         self.chooseWindow.show()
-        self.close()
 
 class chooseWindow(QWidget):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
+        self.parent = parent
         self.init_ui()
 
     def init_ui(self):
@@ -102,19 +103,25 @@ class chooseWindow(QWidget):
         # Buttons for training and testing sections
         self.training_button = QPushButton('Жаттығу аймағы')
         self.testing_button = QPushButton('Тестілеу аймағы')
+        self.logout_button = QPushButton('Аккаунтан шығу')
 
         # Connect buttons to functions
         self.training_button.clicked.connect(self.open_training_section)
         self.testing_button.clicked.connect(self.open_testing_section)
+        self.logout_button.clicked.connect(self.logout)
 
         # Layout for training and testing buttons and LCD
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.training_button)
         button_layout.addWidget(self.testing_button)
 
+        logout_layout = QHBoxLayout()
+        logout_layout.addWidget(self.logout_button)
+
         # Main layout
         layout = QVBoxLayout()
         layout.addLayout(button_layout)
+        layout.addLayout(logout_layout)
 
         self.setLayout(layout)
 
@@ -129,6 +136,10 @@ class chooseWindow(QWidget):
         self.hide()
         self.testing_window = TypingSpeedTest(self)
         self.testing_window.show()
+
+    def logout(self):
+        self.hide()
+        self.parent.show()
 
 
 class TypingSpeedTest(QWidget):
