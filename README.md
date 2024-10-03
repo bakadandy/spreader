@@ -1,4 +1,4 @@
-5 windowns:
+5 windows:
 1. login/authorisation
 2. text import
 3. final score
